@@ -420,7 +420,7 @@ macro_rules! impl_fixed_buffer( ($name:ident, $size:expr) => (
         }
 
         fn full_buffer<'s>(&'s mut self) -> &'s [u8] {
-            assert!(self.buffer_idx == $size);
+            assert_eq!(self.buffer_idx, $size);
             self.buffer_idx = 0;
             &self.buffer[..$size]
         }

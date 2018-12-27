@@ -1083,6 +1083,10 @@ impl Engine256 {
 
         self.finished = true;
     }
+
+    fn finish_no_padding(&mut self) {
+        self.finished = true;
+    }
 }
 
 
@@ -1101,6 +1105,22 @@ impl Sha256 {
             engine: Engine256::new(&H256)
         }
     }
+
+    fn write_result(&self, out: &mut [u8]) {
+        write_u32_be(&mut out[0..4], self.engine.state.h[0]);
+        write_u32_be(&mut out[4..8], self.engine.state.h[1]);
+        write_u32_be(&mut out[8..12], self.engine.state.h[2]);
+        write_u32_be(&mut out[12..16], self.engine.state.h[3]);
+        write_u32_be(&mut out[16..20], self.engine.state.h[4]);
+        write_u32_be(&mut out[20..24], self.engine.state.h[5]);
+        write_u32_be(&mut out[24..28], self.engine.state.h[6]);
+        write_u32_be(&mut out[28..32], self.engine.state.h[7]);
+    }
+
+    pub fn result_no_padding(&mut self, out: &mut [u8]) {
+        self.engine.finish_no_padding();
+        self.write_result(out);
+    }
 }
 
 impl Digest for Sha256 {
@@ -1110,15 +1130,8 @@ impl Digest for Sha256 {
 
     fn result(&mut self, out: &mut [u8]) {
         self.engine.finish();
+        self.write_result(out);
 
-        write_u32_be(&mut out[0..4], self.engine.state.h[0]);
-        write_u32_be(&mut out[4..8], self.engine.state.h[1]);
-        write_u32_be(&mut out[8..12], self.engine.state.h[2]);
-        write_u32_be(&mut out[12..16], self.engine.state.h[3]);
-        write_u32_be(&mut out[16..20], self.engine.state.h[4]);
-        write_u32_be(&mut out[20..24], self.engine.state.h[5]);
-        write_u32_be(&mut out[24..28], self.engine.state.h[6]);
-        write_u32_be(&mut out[28..32], self.engine.state.h[7]);
     }
 
     fn reset(&mut self) {
